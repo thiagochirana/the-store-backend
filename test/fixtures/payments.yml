@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  value: 1.5
+  gateway_used: MyString
+  customer: one
+  commission_percentage_on_sell: 1.5
+  commission_value: 1.5
+  status: MyString
+
+two:
+  value: 1.5
+  gateway_used: MyString
+  customer: two
+  commission_percentage_on_sell: 1.5
+  commission_value: 1.5
+  status: MyString
