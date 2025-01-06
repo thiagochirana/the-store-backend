@@ -10,7 +10,37 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_01_06_073845) do
+ActiveRecord::Schema[8.0].define(version: 2025_01_06_113152) do
+  create_table "commissions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.float "percentage", default: 0.0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_commissions_on_user_id"
+  end
+
+  create_table "customers", force: :cascade do |t|
+    t.string "name"
+    t.string "email"
+    t.string "telephone"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.integer "salesperson_id", null: false
+    t.float "value"
+    t.string "gateway_used"
+    t.integer "customer_id", null: false
+    t.float "commission_percentage_on_sale"
+    t.float "commission_value"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_payments_on_customer_id"
+    t.index ["salesperson_id"], name: "index_payments_on_salesperson_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "role", default: "salesperson"
@@ -20,4 +50,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_06_073845) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end
+
+  add_foreign_key "commissions", "users"
+  add_foreign_key "payments", "customers"
+  add_foreign_key "payments", "users", column: "salesperson_id"
 end
