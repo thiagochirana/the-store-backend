@@ -1,7 +1,10 @@
 class User < ApplicationRecord
   has_secure_password
 
-  has_one :commission
+  has_one :commission, dependent: :destroy
+  has_many :salespersons, class_name: "User", foreign_key: "shopowner_id", dependent: :destroy
+  belongs_to :shopowner, class_name: "User", optional: true
+  has_many :payments
 
   enum :role, shopowner: "shopowner", salesperson: "salesperson", prefix: :is
 
