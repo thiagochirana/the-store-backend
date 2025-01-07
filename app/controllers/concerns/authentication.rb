@@ -12,8 +12,12 @@ module Authentication
       skip_before_action :require_authentication, **options
     end
 
-    def allow_to_admin_users(**options)
-      before_action :require_admin_user
+    def allow_to_shopowners(**options)
+      before_action :require_shopowner_role
+    end
+
+    def allow_to_salespersons(**options)
+      before_action :require_salesperson_role
     end
   end
 
@@ -49,8 +53,15 @@ module Authentication
     nil
   end
 
-  def require_admin_user
-    return nil if current_user.is_admin?
+  def require_shopowner_role
+    return nil if current_user.shopowner?
+
+    unauthorized_request
+    nil
+  end
+
+  def require_salesperson_role
+    return nil if current_user.salesperson? || current_user.shopowner?
 
     unauthorized_request
     nil
@@ -115,5 +126,4 @@ module Authentication
   def token_jwt
     request.headers[:authorization]&.split(" ")&.last
   end
-
 end
