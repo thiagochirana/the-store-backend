@@ -46,12 +46,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_06_113152) do
     t.string "role", default: "salesperson"
     t.string "email", null: false
     t.string "password_digest", null: false
+    t.integer "shopowner_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["shopowner_id"], name: "index_users_on_shopowner_id"
   end
 
   add_foreign_key "commissions", "users"
   add_foreign_key "payments", "customers"
   add_foreign_key "payments", "users", column: "salesperson_id"
+  add_foreign_key "users", "users", column: "shopowner_id"
 end
