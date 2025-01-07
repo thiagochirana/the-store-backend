@@ -8,6 +8,20 @@ Rails.application.routes.draw do
           post "refresh", to: "sessions#refresh"
         end
       end
+      scope :shopowner do
+        get "/", to: "shopowner#dashboard"
+        scope :salespersons do
+          get "/", to: "shopowner#list_salespersons"
+          get "/about", to: "shopowner#about_salesperson"
+          post "/", to: "shopowner#new_salesperson"
+          put "commission", to: "shopowner#adjust_percentage_commission"
+        end
+      end
+
+      scope :payments do
+        get "/", to: "payments#list_payments"
+        post "create", to: "payments#generate_payment"
+      end
     end
   end
 end
