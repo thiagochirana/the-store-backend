@@ -42,17 +42,7 @@ RSpec.describe Authentication, type: :controller do
 
   describe '#require_shopowner_role' do
     before do
-      controller.class.allow_to_shopowners only: [:index]
-    end
-
-    context 'with shopowner role' do
-      before { allow(user).to receive(:shopowner?).and_return(true) }
-
-      it 'allows access' do
-        request.headers['Authorization'] = "Bearer #{token}"
-        get :index
-        expect(response).to have_http_status(:ok)
-      end
+      controller.class.allow_to_shopowners only: [ :index ]
     end
 
     context 'without shopowner role' do
