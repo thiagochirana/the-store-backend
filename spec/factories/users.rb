@@ -4,6 +4,7 @@ FactoryBot.define do
     email { "test@example.com" }
     password { "password123" }
     role { :salesperson }
+    commission { association :commission }
 
     trait :shopowner do
       role { :shopowner }
