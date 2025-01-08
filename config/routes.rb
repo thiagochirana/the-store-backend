@@ -20,6 +20,7 @@ Rails.application.routes.draw do
 
       scope :payments do
         get "/", to: "payments#list_payments"
+        get "details", to: "payments#show_payment"
         post "create", to: "payments#generate_payment"
       end
     end
