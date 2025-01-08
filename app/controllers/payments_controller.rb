@@ -41,27 +41,42 @@ class PaymentsController < ApplicationController
 
 
   def generate_payment
-    salesperson = current_user.salespersons.find_by(id: payment_params[:salesperson_id])
-    return render json: { errors: [ "Vendedor não encontrado" ] }, status: :bad_request unless salesperson
+    if payment_params[:salesperson_id].present?
+      salesperson = current_user.salespersons.find_by(id: payment_params[:salesperson_id])
+      render json: { errors: [ "Vendedor não encontrado" ] }, status: :bad_request unless salesperson.present?
+    end
 
     customer = Customer.find_or_initialize_by(payment_params[:customer])
-    return render json: { errors: customer.errors.full_messages }, status: :bad_request unless customer.save
+    render json: { errors: customer.errors.full_messages }, status: :bad_request unless customer.save
 
     pay = Payment.new(payment_params.except(:customer, :custom_commission_percent))
-    pay.salesperson = salesperson
+    pay.salesperson = salesperson if salesperson.present?
     pay.customer = customer
 
     if payment_params[:custom_commission_percent].present?
       pay.commission_percentage_on_sale = payment_params[:custom_commission_percent].to_f
     else
-      pay.commission_percentage_on_sale = salesperson.commission.percentage
+      pay.commission_percentage_on_sale = salesperson&.commission&.percentage || 0
     end
 
     pay.commission_value = (pay.value * pay.commission_percentage_on_sale) / 100
 
-    return render json: { errors: pay.errors.full_messages }, status: :bad_request unless pay.save
+    render json: { errors: pay.errors.full_messages }, status: :bad_request unless pay.save
 
     render json: { message: "Pagamento processado! Verifique o status de pagamento" }, status: :created
+  end
+
+  def show_payment
+    render json: { errors: [ "Venda não especificada para consulta" ] }, status: :bad_request unless params[:payment_id]
+
+    payments = Payment.where(salesperson_id: current_user.salespersons.select(:id))
+
+    pay = payments.where(id: params[:payment_id]).first
+    if pay.present?
+      render json: { payment: pay }
+    else
+      render json: { errors: [ "Pagamento não encontrado" ] }, status: :not_found
+    end
   end
 
   private
