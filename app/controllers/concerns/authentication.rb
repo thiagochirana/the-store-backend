@@ -13,11 +13,11 @@ module Authentication
     end
 
     def allow_to_shopowners(**options)
-      before_action :require_shopowner_role
+      before_action :require_shopowner_role, **options
     end
 
     def allow_to_salespersons(**options)
-      before_action :require_salesperson_role
+      before_action :require_salesperson_role, **options
     end
   end
 
@@ -47,32 +47,36 @@ module Authentication
   end
 
   def require_authentication
-    return if current_user
-
-    request_need_authentication
-    nil
+    unless current_user
+      request_need_authentication
+      nil
+    end
   end
 
   def require_shopowner_role
-    return nil if current_user.shopowner?
-
-    unauthorized_request
-    nil
+    unless current_user.shopowner?
+      unauthorized_request
+      nil
+    end
   end
 
   def require_salesperson_role
-    return nil if current_user.salesperson? || current_user.shopowner?
-
-    unauthorized_request
-    nil
+    unless current_user.salesperson?
+      unauthorized_request
+      nil
+    end
   end
 
   def request_need_authentication
-    render plain: "É necessário logar-se", status: :unauthorized unless response.body.present?
+    unless response.body.present?
+      render json: { errors: [ "É necessário logar-se para acessar funcionalidade" ] }, status: :unauthorized
+      nil
+    end
   end
 
   def unauthorized_request
-    render plain: "Você não tem autorização para fazer isso", status: :unauthorized
+    render json: { errors: [ "Você não tem autorização para acessar ou realizar esta ação" ] }, status: :unauthorized
+    nil
   end
 
   def decode_token_jwt
@@ -84,10 +88,10 @@ module Authentication
     begin
       JWT.decode(token_jwt, SECRET_KEY, true, algorithm: "HS256").first
     rescue JWT::ExpiredSignature
-      render json: { error: "Login expirado! Por favor faça login" }, status: :unauthorized
+      render json: { errors: [ "Login expirado! Por favor faça login" ] }, status: :unauthorized
       nil
     rescue JWT::DecodeError
-      render json: { error: "Erro ao lhe identificar, por favor, relogue" }, status: :unauthorized
+      render json: { errors: [ "Erro ao lhe identificar, por favor, relogue" ] }, status: :unauthorized
       nil
     end
   end
@@ -101,19 +105,18 @@ module Authentication
     begin
       decoded_token = JWT.decode(token_jwt, SECRET_KEY, true, algorithm: "HS256").first
     rescue JWT::ExpiredSignature
-      render json: { error: "Login expirado! Por favor faça login" }, status: :unauthorized
+      render json: { errors: [ "Login expirado! Por favor faça login" ] }, status: :unauthorized
       return
     rescue JWT::DecodeError
-      render json: { error: "Erro ao lhe identificar, por favor, relogue" }, status: :unauthorized
+      render json: { errors: [ "Erro ao lhe identificar, por favor, relogue" ] }, status: :unauthorized
       return
     rescue JWT::VerificationError
-      render json: { error: "Não foi possível validar seu acesso, por favor, relogue" }, status: :unauthorized
+      render json: { errors: [ "Não foi possível validar seu acesso, por favor, relogue" ] }, status: :unauthorized
       return
     end
 
-
     if decoded_token["exp"] && Time.at(decoded_token["exp"]).utc < Time.current
-      render json: { error: "Realize novo login!" }, status: :unauthorized
+      render json: { errors: [ "Realize novo login!" ] }, status: :unauthorized
       return
     end
 
@@ -122,8 +125,18 @@ module Authentication
     render json: { access_token: gen_access_token(user), message: "Novo token gerado!" }
   end
 
-
   def token_jwt
+    unless request.headers[:authorization].present?
+      request_need_authentication
+      return
+    end
+
+    first = request.headers[:authorization]&.split(" ")&.first
+    unless first == "Bearer"
+      render json: { errors: [ "Realize novo login pois sessão expirou" ] }, status: :unauthorized
+      return
+    end
+
     request.headers[:authorization]&.split(" ")&.last
   end
 end
