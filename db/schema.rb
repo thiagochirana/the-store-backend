@@ -28,7 +28,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_06_113152) do
   end
 
   create_table "payments", force: :cascade do |t|
-    t.integer "salesperson_id", null: false
+    t.integer "salesperson_id"
     t.float "value"
     t.string "gateway_used"
     t.integer "customer_id", null: false
