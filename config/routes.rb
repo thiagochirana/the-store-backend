@@ -23,6 +23,10 @@ Rails.application.routes.draw do
         get "details", to: "payments#show_payment"
         post "create", to: "payments#generate_payment"
       end
+
+      scope :salesperson do
+        get "/", to: "salesperson#dashboard"
+      end
     end
   end
 end
