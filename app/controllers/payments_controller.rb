@@ -2,7 +2,7 @@ class PaymentsController < ApplicationController
   allow_to_shopowners
 
   def list_payments
-    payments = Payment.where(salesperson_id: current_user.salespersons.select(:id))
+    payments = all_payments_from_store
 
     payments = payments.where(salesperson_id: params[:salesperson_id]) if params[:salesperson_id].present?
 
@@ -43,14 +43,15 @@ class PaymentsController < ApplicationController
   def generate_payment
     if payment_params[:salesperson_id].present?
       salesperson = current_user.salespersons.find_by(id: payment_params[:salesperson_id])
-      render json: { errors: [ "Vendedor não encontrado" ] }, status: :bad_request unless salesperson.present?
+    else
+      salesperson = current_user
     end
 
     customer = Customer.find_or_initialize_by(payment_params[:customer])
     render json: { errors: customer.errors.full_messages }, status: :bad_request unless customer.save
 
     pay = Payment.new(payment_params.except(:customer, :custom_commission_percent))
-    pay.salesperson = salesperson if salesperson.present?
+    pay.salesperson = salesperson
     pay.customer = customer
 
     if payment_params[:custom_commission_percent].present?
@@ -69,7 +70,7 @@ class PaymentsController < ApplicationController
   def show_payment
     render json: { errors: [ "Venda não especificada para consulta" ] }, status: :bad_request unless params[:payment_id]
 
-    payments = Payment.where(salesperson_id: current_user.salespersons.select(:id))
+    payments = all_payments_from_store
 
     pay = payments.where(id: params[:payment_id]).first
     if pay.present?
@@ -81,13 +82,13 @@ class PaymentsController < ApplicationController
 
   private
 
-  def payment_params
-    params.permit(
-      :gateway_used,
-      :value,
-      :salesperson_id,
-      :custom_commission_percent,
-      customer: [ :name, :email, :telephone ]
-    )
-  end
+    def payment_params
+      params.permit(
+        :gateway_used,
+        :value,
+        :salesperson_id,
+        :custom_commission_percent,
+        customer: [ :name, :email, :telephone ]
+      )
+    end
 end

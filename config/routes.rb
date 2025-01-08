@@ -22,10 +22,14 @@ Rails.application.routes.draw do
         get "/", to: "payments#list_payments"
         get "details", to: "payments#show_payment"
         post "create", to: "payments#generate_payment"
+
+        get "shopowner/sum_values", to: "shopowner#value_from_all_payments"
+        get "salesperson/sum_values", to: "salesperson#value_from_all_payments"
       end
 
       scope :salesperson do
         get "/", to: "salesperson#dashboard"
+        get "/payments", to: "salesperson#payments"
       end
     end
   end

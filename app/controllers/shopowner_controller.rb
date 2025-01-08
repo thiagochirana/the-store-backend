@@ -17,7 +17,7 @@ class ShopownerController < ApplicationController
   end
 
   def about_salesperson
-    user = current_user.salespersons.find_by(id: params[:user_id])
+    user = current_user.salespersons.where(id: params[:user_id]).first
     if user.present?
       render json: {
         id: user.id,
@@ -51,6 +51,13 @@ class ShopownerController < ApplicationController
     end
   end
 
+  def value_from_all_payments
+    pays = all_payments_from_store
+    sum_pays = pays.sum(:value)
+    render json: {
+      all_payments: sum_pays
+    }
+  end
 
   private
 
