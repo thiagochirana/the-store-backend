@@ -4,8 +4,8 @@ FactoryBot.define do
 
     name { Faker::Name.name }
     email { Faker::Internet.email }
-    password { pass }
-    password_confirmation { pass }
+    password { "password123" }
+    password_confirmation { "password123" }
 
     trait :without_password do
       password { nil }
