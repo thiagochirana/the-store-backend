@@ -80,3 +80,5 @@ end
 
 require 'simplecov'
 SimpleCov.start
+
+Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
