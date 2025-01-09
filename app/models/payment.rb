@@ -10,9 +10,7 @@ class Payment < ApplicationRecord
 
   before_create :generate_status_payment
 
-  private
-
-    def generate_status_payment
-      self.status = Payment.statuses.keys.sample
-    end
+  def generate_status_payment
+    self.status = Payment.statuses.keys.sample
+  end
 end
