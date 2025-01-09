@@ -4,12 +4,10 @@ class SessionsController < ApplicationController
   def create
     user = User.authenticate_by(email: user_params[:login], password: user_params[:password])
 
-    if user.is_a?(User) && user.errors.any?
-      render json: { errors: user.errors.full_messages }, status: :unauthorized
-    elsif user
+    if user.is_a?(User) && !user.errors.any?
       render json: { access_token: gen_access_token(user), refresh_token: gen_refresh_token(user), message: "Logado com sucesso!" }
     else
-      render json: { message: "Login e senha inválidos" }, status: :unauthorized
+      render json: { errors: [ "Login e senha inválidos" ] }, status: :unauthorized
     end
   end
 
