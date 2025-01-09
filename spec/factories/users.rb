@@ -1,13 +1,35 @@
 FactoryBot.define do
   factory :user do
-    name { "Test User" }
-    email { "test@example.com" }
-    password { "password123" }
-    role { :salesperson }
-    commission { association :commission }
+    pass = Faker::Alphanumeric.alpha(number: 8)
 
-    trait :shopowner do
-      role { :shopowner }
+    name { Faker::Name.name }
+    email { Faker::Internet.email }
+    password { pass }
+    password_confirmation { pass }
+
+    trait :without_password do
+      password { nil }
+      password_confirmation { nil }
+    end
+
+    trait :with_short_password do
+      password { Faker::Alphanumeric.alpha(number: 7) }
+      password_confirmation { password }
+    end
+
+    trait :with_mismatched_password do
+      password { Faker::Alphanumeric.alpha(number: 8) }
+      password_confirmation { Faker::Alphanumeric.alpha(number: 8) }
+    end
+
+    trait :with_spaced_pass do
+      password { "   #{Faker::Alphanumeric.alpha(number: 8)}  " }
+      password_confirmation { "   #{Faker::Alphanumeric.alpha(number: 8)}  " }
+    end
+
+    trait :with_invalid_pass_chars do
+      password { "Ç#{pass}" }
+      password_confirmation { "Ç#{pass}" }
     end
   end
 end
