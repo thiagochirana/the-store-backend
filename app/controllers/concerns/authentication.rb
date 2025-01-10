@@ -32,6 +32,7 @@ module Authentication
   def generate_jwt_for(user, token_type, expiration_time:)
     payload = {
       user_id: user.id,
+      role: user.role,
       exp: expiration_time.to_i
     }
 
