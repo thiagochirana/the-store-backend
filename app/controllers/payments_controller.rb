@@ -17,6 +17,8 @@ class PaymentsController < ApplicationController
 
     payments = payments.where(status: params[:status]) if params[:status].present?
 
+    payments = payments.where(gateway_used: params[:gateway_used]) if params[:gateway_used].present?
+
     page = params[:page].to_i > 0 ? params[:page].to_i : 1
     per_page = params[:per_page].to_i > 0 ? params[:per_page].to_i : 10
     total_pages = (payments.count / per_page.to_f).ceil
@@ -48,7 +50,10 @@ class PaymentsController < ApplicationController
     end
 
     customer = Customer.find_or_initialize_by(payment_params[:customer])
-    render json: { errors: customer.errors.full_messages }, status: :bad_request unless customer.save
+    unless customer.save
+      render json: { errors: customer.errors.full_messages }, status: :bad_request
+      return
+    end
 
     pay = Payment.new(payment_params.except(:customer, :custom_commission_percent))
     pay.salesperson = salesperson
@@ -61,11 +66,15 @@ class PaymentsController < ApplicationController
     end
 
     pay.commission_value = (pay.value * pay.commission_percentage_on_sale) / 100
+    pay.commission_value = pay.commission_value.round(2)
 
-    render json: { errors: pay.errors.full_messages }, status: :bad_request unless pay.save
-
-    render json: { message: "Pagamento processado! Verifique o status de pagamento" }, status: :created
+    if pay.save
+      render json: { message: "Pagamento processado! Verifique o status de pagamento" }, status: :created
+    else
+      render json: { errors: pay.errors.full_messages }, status: :bad_request
+    end
   end
+
 
   def show_payment
     render json: { errors: [ "Venda não especificada para consulta" ] }, status: :bad_request unless params[:payment_id]

@@ -9,8 +9,13 @@ class Payment < ApplicationRecord
   validates :gateway_used, inclusion: { in: gateway_useds.keys }
 
   before_create :generate_status_payment
+  before_create :adjust_value_to_float
 
   def generate_status_payment
     self.status = Payment.statuses.keys.sample
+  end
+
+  def adjust_value_to_float
+    self.value = self.value.to_f if self.value
   end
 end

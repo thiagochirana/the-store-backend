@@ -22,7 +22,7 @@ module Authentication
   end
 
   def gen_access_token(user)
-    generate_jwt_for(user, "access", expiration_time: 15.minutes.from_now)
+    generate_jwt_for(user, "access", expiration_time: 6.hours.from_now)
   end
 
   def gen_refresh_token(user)
