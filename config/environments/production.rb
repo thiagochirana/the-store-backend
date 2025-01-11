@@ -76,6 +76,14 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
+  config.hosts = [
+    "localhost:3005",
+    "localhost:3000",
+    "0.0.0.0:3005",
+    "0.0.0.0:3000",
+    "the-store.devcurumin.com.br"
+  ]
+
   # Enable DNS rebinding protection and other `Host` header attacks.
   # config.hosts = [
   #   "example.com",     # Allow requests from example.com
