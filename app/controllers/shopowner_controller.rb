@@ -59,12 +59,12 @@ class ShopownerController < ApplicationController
     }
   end
 
-  def adjust_percentage_commission
-    user = current_user.salespersons.find_by(id: params[:user_id])
-    if user.commission.update(percentage: params[:new_percentual_commission])
-      render json: { message: "Commissão atualizada para #{params[:new_percentual_commission]} % " }
+  def update
+    user = current_user.salespersons.find_by(id: salesperson_edit_params[:user_id])
+    if user.commission.update!(percentage: salesperson_edit_params[:percentual_commission]) && user.update!(salesperson_edit_params.except(:user_id, :percentual_commission))
+      render json: { message: "Usuario atualizado com sucesso!" }
     else
-      render json: { errors: user.commission.errors.full_messages }, status: :bad_request
+      render json: { errors: user.errors.full_messages || user.commission.errors.full_messages }, status: :bad_request
     end
   end
 
@@ -80,6 +80,10 @@ class ShopownerController < ApplicationController
 
     def salesperson_params
       params.permit(:name, :email, :password, :password_confirmation)
+    end
+
+    def salesperson_edit_params
+      params.permit(:user_id, :name, :email, :percentual_commission)
     end
 
     def payment_params
