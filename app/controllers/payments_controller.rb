@@ -16,19 +16,35 @@ class PaymentsController < ApplicationController
     payments = payments.where("commission_value <= ?", params[:max_commission_value]) if params[:max_commission_value].present?
 
     payments = payments.where(status: params[:status]) if params[:status].present?
-
     payments = payments.where(gateway_used: params[:gateway_used]) if params[:gateway_used].present?
 
+    payments = payments.where("DATE(created_at) >= ?", params[:start_date]) if params[:start_date].present?
+    payments = payments.where("DATE(created_at) <= ?", params[:end_date]) if params[:end_date].present?
+
     page = params[:page].to_i > 0 ? params[:page].to_i : 1
-    per_page = params[:per_page].to_i > 0 ? params[:per_page].to_i : 10
+    per_page = params[:per_page].to_i > 0 ? params[:per_page].to_i : 1
     total_pages = (payments.count / per_page.to_f).ceil
 
     payments = payments.offset((page - 1) * per_page).limit(per_page)
 
-
     if payments.any?
       render json: {
-        payments: payments,
+        payments: payments.map { |p|
+          {
+            id: p.id,
+            status: p.status,
+            value: p.value,
+            customer: {
+              name: p.customer.name,
+              email: p.customer.email,
+              telephone: p.customer.telephone
+            },
+            gateway_used: p.gateway_used,
+            salesperson_id: p.salesperson.name,
+            commission_percentage_on_sale: p.commission_percentage_on_sale,
+            commission_value: p.commission_value
+          }
+        },
         pagination: {
           current_page: page,
           per_page: per_page,
