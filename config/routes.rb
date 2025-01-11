@@ -12,6 +12,7 @@ Rails.application.routes.draw do
         get "/", to: "shopowner#dashboard"
         scope :salespersons do
           get "/", to: "shopowner#list_salespersons"
+          get "/all", to: "shopowner#list_all_salespersons"
           get "/about", to: "shopowner#about_salesperson"
           post "/", to: "shopowner#new_salesperson"
           put "update", to: "shopowner#update"

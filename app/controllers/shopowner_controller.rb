@@ -2,17 +2,41 @@ class ShopownerController < ApplicationController
   allow_to_shopowners
 
   def dashboard
+    pays = all_payments_from_store
+
+    all_total = pays.sum(:value)
+    failed_total = pays.where(status: "failed").sum(:value)
+    pending_total = pays.where(status: "pending").sum(:value)
+    approved_total = pays.where(status: "approved").sum(:value)
+
+    total_commission_value = pays.sum(:commission_value)
+    average_commission_percentage = pays.average(:commission_percentage_on_sale).to_f
+
+    render json: {
+      all_total: all_total.round(2),
+      failed_total: failed_total.round(2),
+      pending_total: pending_total.round(2),
+      approved_total: approved_total.round(2),
+      total_commission_value: total_commission_value.round(2),
+      average_commission_percentage: average_commission_percentage.round(2)
+    }
   end
 
-  def new_salesperson
-    user = User.new(salesperson_params)
-    user.shopowner = current_user
 
-    if user.save
-      user.commission.update(percentage: params[:percentual_commission].to_f) if params[:percentual_commission]
+  def new_salesperson
+    begin
+      user = User.new(salesperson_params)
+      user.shopowner = current_user
+      user.save!
+
+      com_perc = params[:percentual_commission].to_f
+      Commission.create!(percentage: (com_perc > 0 ? com_perc : 0), user: user)
+
       render json: { message: "Usuário cadastrado com sucesso!" }, status: :created
-    else
-      render json: { errors: user.errors.full_messages }, status: :bad_request
+    rescue ActiveRecord::RecordInvalid => e
+      render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+    rescue Exception => e
+      render json: { errors: [ e.message ] }, status: :unprocessable_entity
     end
   end
 
@@ -55,6 +79,19 @@ class ShopownerController < ApplicationController
         per_page: per_page,
         total_pages: total_pages,
         total_records: salespersons.count
+      }
+    }
+  end
+
+  def list_all_salespersons
+    salespersons = current_user.salespersons.order(:name)
+
+    render json: {
+      salespersons: salespersons.map { |s|
+        {
+          id: s.id,
+          name: s.name
+        }
       }
     }
   end

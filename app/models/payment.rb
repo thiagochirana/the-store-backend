@@ -5,7 +5,7 @@ class Payment < ApplicationRecord
   enum :gateway_used, mercado_pago: "mercado_pago", pagseguro: "pagseguro", prefix: "gateway_"
   enum :status, pending: "pending", approved: "approved", failed: "failed"
 
-  validates :value, presence: true
+  validates :value, presence: true, numericality: { greater_than: 0 }
   validates :gateway_used, inclusion: { in: gateway_useds.keys }
 
   before_create :generate_status_payment
@@ -13,6 +13,9 @@ class Payment < ApplicationRecord
 
   def generate_status_payment
     self.status = Payment.statuses.keys.sample
+    if self.status != "approved"
+      self.commission_value = 0
+    end
   end
 
   def adjust_value_to_float

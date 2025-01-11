@@ -14,12 +14,6 @@ class User < ApplicationRecord
   validate :password_does_not_contain_spaces
   validate :password_does_not_contain_invalid_chars
 
-  after_create :generate_commission
-
-  def generate_commission
-    Commission.create(user: self)
-  end
-
   def password_present?
     password.present?
   end
