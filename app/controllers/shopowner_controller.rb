@@ -32,40 +32,32 @@ class ShopownerController < ApplicationController
 
   def list_salespersons
     salespersons = current_user.salespersons
-
     salespersons = salespersons.where("name LIKE ?", "%#{params[:name]}%") if params[:name].present?
     salespersons = salespersons.where("email LIKE ?", "%#{params[:email]}%") if params[:email].present?
 
     page = params[:page].to_i > 0 ? params[:page].to_i : 1
     per_page = params[:per_page].to_i > 0 ? params[:per_page].to_i : 10
     total_pages = (salespersons.count / per_page.to_f).ceil
-
     salespersons = salespersons.offset((page - 1) * per_page).limit(per_page)
 
-    if salespersons.any?
-      render json: {
-        salespersons: salespersons.map { |s|
-          {
-            id: s.id,
-            name: s.name,
-            email: s.email,
-            created_at: s.created_at,
-            commission_percentage: s.commission&.percentage || 0.0
-          }
-        },
-        pagination: {
-          current_page: page,
-          per_page: per_page,
-          total_pages: total_pages,
-          total_records: salespersons.count
+    render json: {
+      salespersons: salespersons.map { |s|
+        {
+          id: s.id,
+          name: s.name,
+          email: s.email,
+          created_at: s.created_at,
+          commission_percentage: s.commission&.percentage || 0.0
         }
+      },
+      pagination: {
+        current_page: page,
+        per_page: per_page,
+        total_pages: total_pages,
+        total_records: salespersons.count
       }
-    else
-      render json: []
-    end
+    }
   end
-
-
 
   def adjust_percentage_commission
     user = current_user.salespersons.find_by(id: params[:user_id])
