@@ -76,7 +76,7 @@ module Authentication
   end
 
   def unauthorized_request
-    render json: { errors: [ "Você não tem autorização para acessar ou realizar esta ação" ] }, status: :unauthorized
+    render json: { errors: [ "Você não tem autorização para acessar ou realizar esta ação" ] }, status: :forbidden
     nil
   end
 
