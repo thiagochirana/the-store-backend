@@ -14,7 +14,7 @@ Rails.application.routes.draw do
           get "/", to: "shopowner#list_salespersons"
           get "/about", to: "shopowner#about_salesperson"
           post "/", to: "shopowner#new_salesperson"
-          put "commission", to: "shopowner#adjust_percentage_commission"
+          put "update", to: "shopowner#update"
         end
       end
 
