@@ -7,11 +7,7 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins "localhost:3005",
-    "localhost:3000",
-    "0.0.0.0:3005",
-    "0.0.0.0:3000",
-    "the-store.devcurumin.com.br"
+    origins "*"
 
     resource "*",
       headers: :any,
